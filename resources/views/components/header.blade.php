@@ -10,18 +10,15 @@
             
             <!-- Navigation Menu -->
             <nav class="ml-8 flex space-x-8">
-                <a href="/" class="text-gray-900 font-medium {{ request()->is('/') ? 'border-b-2 border-indigo-500' : '' }}">
+                <a href="/" class="text-gray-500 hover:text-gray-900 {{ request()->is('/') ? 'border-b-2 border-indigo-500 text-gray-900' : '' }}">
                     Beranda
                 </a>
-                <a href="/resep" class="text-gray-500 hover:text-gray-900 {{ request()->is('resep*') ? 'border-b-2 border-indigo-500' : '' }}">
-                    Resep
+                <a href="/resep" class="text-gray-500 hover:text-gray-900 {{ request()->is('resep*') ? 'border-b-2 border-indigo-500 text-gray-900' : '' }}">
+                    Perencanaan Menu
                 </a>
-                <a href="/pengelolaan-daftar-belanja" class="text-gray-500 hover:text-gray-900 {{ request()->is('pengelolaan-daftar-belanja*') ? 'border-b-2 border-indigo-500' : '' }}">
-                    Pengelolaan Daftar Belanja
-                </a>
-                {{-- <a href="/cari-resep" class="text-gray-500 hover:text-gray-900 {{ request()->is('cari-resep*') ? 'border-b-2 border-indigo-500' : '' }}">
+                <a href="/cari-resep" class="text-gray-500 hover:text-gray-900 {{ request()->is('cari-resep*') ? 'border-b-2 border-indigo-500 text-gray-900' : '' }}">
                     Cari Resep
-                </a> --}}
+                </a>
             </nav>
         </div>
     </div>

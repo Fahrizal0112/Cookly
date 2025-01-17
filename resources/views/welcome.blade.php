@@ -60,71 +60,134 @@
             const recipeContainer = document.querySelector('#recipe-container');
             const loadingState = document.querySelector('#loading-state');
             const selectedIngredients = new Set();
-
-            // Debug untuk memastikan elements ditemukan
-            console.log('Search Input:', searchInput);
-            console.log('Selected Ingredients Container:', selectedIngredientsContainer);
-
+    
+            // Daftar terjemahan bahan
+            const ingredientTranslations = {
+                // Sayuran
+                "bayam": "spinach",
+                "wortel": "carrot",
+                "kentang": "potato",
+                "bawang merah": "shallot",
+                "bawang putih": "garlic",
+                "cabai": "chili",
+                "tomat": "tomato",
+                "kangkung": "water spinach",
+                "kol": "cabbage",
+                "brokoli": "broccoli",
+                
+                // Protein
+                "ayam": "chicken",
+                "daging sapi": "beef",
+                "ikan": "fish",
+                "telur": "egg",
+                "udang": "shrimp",
+                "tahu": "tofu",
+                "tempe": "tempeh",
+                
+                // Bumbu
+                "garam": "salt",
+                "merica": "pepper",
+                "kunyit": "turmeric",
+                "jahe": "ginger",
+                "ketumbar": "coriander",
+                "serai": "lemongrass",
+                "kecap": "soy sauce",
+                
+                // Bahan Dasar
+                "beras": "rice",
+                "tepung": "flour",
+                "minyak": "oil",
+                "gula": "sugar",
+                "susu": "milk",
+                
+                // Buah
+                "pisang": "banana",
+                "apel": "apple",
+                "jeruk": "orange",
+                "mangga": "mango",
+                "nanas": "pineapple"
+            };
+    
+            // Fungsi untuk menerjemahkan bahan
+            function translateIngredient(indonesianName) {
+                // Ubah ke lowercase untuk memudahkan pencarian
+                const normalizedName = indonesianName.toLowerCase().trim();
+                
+                // Cari di daftar terjemahan
+                const englishName = ingredientTranslations[normalizedName];
+                
+                if (englishName) {
+                    return {
+                        indonesian: indonesianName,
+                        english: englishName
+                    };
+                }
+                
+                // Jika tidak ditemukan, kembalikan bahan asli
+                return {
+                    indonesian: indonesianName,
+                    english: indonesianName // gunakan nama asli jika tidak ada terjemahan
+                };
+            }
+    
             // Handle ingredient input dengan keydown dan submit
             searchInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
-                    e.preventDefault(); // Mencegah form submit
+                    e.preventDefault();
                     const ingredient = this.value.trim();
-                    console.log('Adding ingredient:', ingredient); // Debug
-
+                    
                     if (ingredient) {
-                        addIngredient(ingredient);
+                        const translation = translateIngredient(ingredient);
+                        addIngredient(translation);
                         this.value = ''; // Clear input
                     }
                 }
             });
-
-            function addIngredient(ingredient) {
-                console.log('Adding ingredient to set:', ingredient); // Debug
-                
-                if (!selectedIngredients.has(ingredient)) {
-                    selectedIngredients.add(ingredient);
+    
+            function addIngredient(translation) {
+                if (!selectedIngredients.has(translation.english)) {
+                    selectedIngredients.add(translation.english);
                     renderSelectedIngredients();
                     updateSearch();
                 }
             }
-
+    
             function renderSelectedIngredients() {
-                console.log('Rendering ingredients:', Array.from(selectedIngredients)); // Debug
                 selectedIngredientsContainer.innerHTML = '';
                 
-                selectedIngredients.forEach(ingredient => {
+                selectedIngredients.forEach(englishName => {
+                    // Cari nama Indonesia dari daftar terjemahan
+                    const indonesianName = Object.entries(ingredientTranslations)
+                        .find(([indo, eng]) => eng === englishName)?.[0] || englishName;
+                    
                     const tag = document.createElement('span');
                     tag.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100';
                     tag.innerHTML = `
-                        ${ingredient}
+                        ${indonesianName} (${englishName})
                         <button class="ml-1 text-gray-500 hover:text-gray-700" 
-                                onclick="removeIngredient('${ingredient}')">×</button>
+                                onclick="removeIngredient('${englishName}')">×</button>
                     `;
                     selectedIngredientsContainer.appendChild(tag);
                 });
             }
-
-            // Memindahkan removeIngredient ke dalam scope yang benar
-            window.removeIngredient = function(ingredient) {
-                console.log('Removing ingredient:', ingredient); // Debug
-                selectedIngredients.delete(ingredient);
+    
+            window.removeIngredient = function(englishName) {
+                selectedIngredients.delete(englishName);
                 renderSelectedIngredients();
                 updateSearch();
             };
-
+    
             function updateSearch() {
                 if (selectedIngredients.size === 0) {
                     recipeContainer.innerHTML = '<p class="text-center col-span-3 text-gray-500">Masukkan bahan untuk mencari resep</p>';
                     return;
                 }
-
+    
                 loadingState.classList.remove('hidden');
                 recipeContainer.classList.add('hidden');
-
+    
                 const ingredients = Array.from(selectedIngredients).join(',');
-                console.log('Searching for ingredients:', ingredients); // Debug
-
+    
                 fetch('/search-recipes', {
                     method: 'POST',
                     headers: {
@@ -135,7 +198,6 @@
                 })
                 .then(response => response.json())
                 .then(recipes => {
-                    console.log('Recipes received:', recipes); // Debug
                     loadingState.classList.add('hidden');
                     recipeContainer.classList.remove('hidden');
                     updateRecipeCards(recipes);
